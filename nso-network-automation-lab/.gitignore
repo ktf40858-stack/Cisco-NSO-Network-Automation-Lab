@@ -1,0 +1,60 @@
+# NSO specific
+ncs-cdb/
+state/
+logs/
+packages/
+backups/
+*.pyc
+*.pyo
+__pycache__/
+
+# NSO runtime files
+*.fxs
+*.ccl
+*.hdb
+*.idx
+*.log
+ncs-java-vm.log
+ncs-python-vm.log
+ncs.conf.merged
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Environment files
+.env
+.env.local
+venv/
+env/
+
+# Credentials and secrets
+*.key
+*.pem
+*.crt
+secrets/
+credentials.yaml
+authgroups-passwords.txt
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Test outputs
+test-results/
+coverage/
+*.coverage

@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns="http://tail-f.com/ns/config/1.0">
+  <devices xmlns="http://tail-f.com/ns/ncs">
+    <device>
+      <name>{/device}</name>
+      <config>
+
+        <!-- VLAN configuration for Cisco NX-OS devices -->
+        <?if {device-type[contains(., 'nx')]}?>
+        <vlan xmlns="http://tail-f.com/ned/cisco-nx">
+          <vlan-list>
+            <id>{/vlan-id}</id>
+            <name>{/vlan-name}</name>
+            <?if {/vlan-state}?>
+            <state>{/vlan-state}</state>
+            <?end?>
+          </vlan-list>
+        </vlan>
+
+        <?if {/svi-interface}?>
+        <interface xmlns="http://tail-f.com/ned/cisco-nx">
+          <Vlan>
+            <name>{/vlan-id}</name>
+            <description>{/description}</description>
+            <no>
+              <shutdown/>
+            </no>
+            <?if {/ip-address}?>
+            <ip>
+              <address>
+                <ipaddr>{/ip-address}/{/prefix-length}</ipaddr>
+              </address>
+              <redirects>false</redirects>
+            </ip>
+            <?end?>
+            <?if {/ipv6-address}?>
+            <ipv6>
+              <address>
+                <ipv6-addr-mask>{/ipv6-address}/{/ipv6-prefix}</ipv6-addr-mask>
+              </address>
+              <redirects>false</redirects>
+            </ipv6>
+            <?end?>
+          </Vlan>
+        </interface>
+        <?end?>
+        <?end?>
+
+        <!-- VLAN configuration for Cisco IOS devices -->
+        <?if {device-type[contains(., 'ios')] and not(device-type[contains(., 'iosxr')])}?>
+        <vlan xmlns="urn:ios">
+          <vlan-list>
+            <id>{/vlan-id}</id>
+            <name>{/vlan-name}</name>
+          </vlan-list>
+        </vlan>
+
+        <?if {/svi-interface}?>
+        <interface xmlns="urn:ios">
+          <Vlan>
+            <name>{/vlan-id}</name>
+            <description>{/description}</description>
+            <?if {/ip-address}?>
+            <ip>
+              <address>
+                <primary>
+                  <address>{/ip-address}</address>
+                  <mask>{/subnet-mask}</mask>
+                </primary>
+              </address>
+            </ip>
+            <?end?>
+            <no>
+              <shutdown/>
+            </no>
+          </Vlan>
+        </interface>
+        <?end?>
+        <?end?>
+
+        <!-- VLAN configuration for Cisco IOS-XR devices -->
+        <?if {device-type[contains(., 'iosxr')]}?>
+        <interface xmlns="http://tail-f.com/ned/cisco-ios-xr">
+          <GigabitEthernet-subinterface>
+            <GigabitEthernet>
+              <id>{/parent-interface}.{/vlan-id}</id>
+              <description>{/vlan-name}</description>
+              <encapsulation>
+                <dot1q>
+                  <vlan-id>{/vlan-id}</vlan-id>
+                </dot1q>
+              </encapsulation>
+              <?if {/ip-address}?>
+              <ipv4>
+                <address>
+                  <ip>{/ip-address}</ip>
+                  <mask>{/subnet-mask}</mask>
+                </address>
+              </ipv4>
+              <?end?>
+            </GigabitEthernet>
+          </GigabitEthernet-subinterface>
+        </interface>
+        <?end?>
+
+        <!-- Trunk port configuration for all platforms -->
+        <?if {/trunk-ports}?>
+        <?foreach {/trunk-ports}?>
+
+        <?if {device-type[contains(., 'nx')]}?>
+        <interface xmlns="http://tail-f.com/ned/cisco-nx">
+          <Ethernet>
+            <name>{interface-id}</name>
+            <switchport>
+              <mode>
+                <trunk/>
+              </mode>
+              <trunk>
+                <allowed>
+                  <vlan>
+                    <vlan-list>{/vlan-id}</vlan-list>
+                  </vlan>
+                </allowed>
+                <?if {/native-vlan}?>
+                <native>
+                  <vlan>{/native-vlan}</vlan>
+                </native>
+                <?end?>
+              </trunk>
+            </switchport>
+          </Ethernet>
+        </interface>
+        <?end?>
+
+        <?if {device-type[contains(., 'ios')] and not(device-type[contains(., 'iosxr')])}?>
+        <interface xmlns="urn:ios">
+          <GigabitEthernet>
+            <name>{interface-id}</name>
+            <switchport>
+              <mode>
+                <trunk/>
+              </mode>
+              <trunk>
+                <allowed>
+                  <vlan>
+                    <vlan-list>{/vlan-id}</vlan-list>
+                  </vlan>
+                </allowed>
+                <?if {/native-vlan}?>
+                <native>
+                  <vlan>{/native-vlan}</vlan>
+                </native>
+                <?end?>
+              </trunk>
+            </switchport>
+          </GigabitEthernet>
+        </interface>
+        <?end?>
+
+        <?end?>
+        <?end?>
+
+        <!-- Access port configuration -->
+        <?if {/access-ports}?>
+        <?foreach {/access-ports}?>
+
+        <?if {device-type[contains(., 'nx')]}?>
+        <interface xmlns="http://tail-f.com/ned/cisco-nx">
+          <Ethernet>
+            <name>{interface-id}</name>
+            <switchport>
+              <mode>
+                <access/>
+              </mode>
+              <access>
+                <vlan>{/vlan-id}</vlan>
+              </access>
+            </switchport>
+            <spanning-tree>
+              <port>
+                <type>
+                  <edge/>
+                </type>
+              </port>
+              <bpduguard>
+                <enable/>
+              </bpduguard>
+            </spanning-tree>
+          </Ethernet>
+        </interface>
+        <?end?>
+
+        <?if {device-type[contains(., 'ios')] and not(device-type[contains(., 'iosxr')])}?>
+        <interface xmlns="urn:ios">
+          <GigabitEthernet>
+            <name>{interface-id}</name>
+            <switchport>
+              <mode>
+                <access/>
+              </mode>
+              <access>
+                <vlan>{/vlan-id}</vlan>
+              </access>
+            </switchport>
+            <spanning-tree>
+              <portfast/>
+              <bpduguard>
+                <enable/>
+              </bpduguard>
+            </spanning-tree>
+          </GigabitEthernet>
+        </interface>
+        <?end?>
+
+        <?end?>
+        <?end?>
+
+      </config>
+    </device>
+  </devices>
+</config>
